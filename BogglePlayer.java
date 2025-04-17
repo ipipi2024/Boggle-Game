@@ -104,6 +104,7 @@ public class BogglePlayer
 
     public Word[] getWords(char[][] board)
     {
+      //printBoard(board);
       /* Priority queue is to return the longest words, aka the most points */
       PriorityQueue<Word> pQ = new PriorityQueue<>(wC);
 
@@ -137,11 +138,16 @@ public class BogglePlayer
         }
       }
 
+      myWords[wordCounter] = pQ.remove();
+      //System.out.println(myWords[wordCounter].getWord());
+      wordCounter++;
       /* Add top 20 words to the myWords */
-      while (!pQ.isEmpty() && wordCounter < 20) {
+      while (!pQ.isEmpty() && wordCounter < 19) {
         myWords[wordCounter] = pQ.remove();
-        //System.out.println(myWords[wordCounter].getWord());
-        wordCounter++;
+        if (!myWords[wordCounter-1].getWord().equals(myWords[wordCounter].getWord())) {
+          //System.out.println(myWords[wordCounter].getWord());
+          wordCounter++;
+        }
       }
 
 
