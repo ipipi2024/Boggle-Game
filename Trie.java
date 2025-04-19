@@ -46,6 +46,7 @@ public class Trie {
             currentNode = children.get(L);
             children = currentNode.getChildren();
         }
+        //System.out.println(target + " " + currentNode.getChar());
         return currentNode;
     }
 
@@ -58,29 +59,34 @@ public class Trie {
         return this;
     }
     
-    //still needs some fixes I will do it tmwr 
+    
     public Node searchCompressed(String target){
         Node current = root;
         int index = 0;
         while(index < target.length()){
-            char nextchar = target.charAt(index);
-            for (Node node : current.getChildren().values().iterator().next()){
-                
-            }
-            if(!current.getChildren().containsKey(nextchar)){
-                return null;
-            }
-            Node child = current.getChildren().get(nextchar);
-            System.out.println(target+ " " + current.getChildren());
-            String segment = child.getString();
             
-            if(segment != null && !target.startsWith(segment,index)){
+            //char nextchar = target.charAt(index);
+            //Node child = null;
+            boolean found = false;
+            for (Node node : current.getChildren().values()){
+                if(node.getString() != null && target.startsWith(node.getString(),index)){
+                    index += node.getString().length();
+                    current = node;
+                    found = true;
+                    break;
+                    
+                }
+            }
+            if( !found){
                 return null;
             }
-            index += segment.length();
-            current = child;
+            
+            
+
             
         }
+        //System.out.println(target + " " + index + " " + current.getString() + " " + current.getEnd());
+        //System.out.println(current.getChildren());
         return current;
     }
 }
