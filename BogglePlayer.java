@@ -15,8 +15,8 @@
   The DFS algorithm recursively explores adjacent cells while tracking visited positions to avoid using
   the same position multiple times for a single word.
   
-  The implementation prioritizes longer words for higher scoring, and limits the result to at most 20 words
-  as required by the specifications.
+  The implementation collects all valid words during board traversal and then selects the top 20
+  highest-scoring words (prioritizing longer words) for the final result.
 */
 
 import java.util.*;
@@ -117,11 +117,9 @@ public class BogglePlayer {
 
   // Based on the board, find valid words
   public Word[] getWords(char[][] board) {
-    try {
-      Thread.sleep(10); // 10 milliseconds delay
-    } catch (InterruptedException e) {
-      // Ignore
-    }
+    // Use a Set to efficiently track duplicates
+    Set<String> foundWordStrings = new HashSet<>();
+    
     // PriorityQueue to store found words prioritized by score (longer words first)
     PriorityQueue<Word> foundWords = new PriorityQueue<>((w1, w2) -> {
       int score1 = calculateScore(w1.getWord().length());
@@ -139,7 +137,7 @@ public class BogglePlayer {
         ArrayList<Location> currentPath = new ArrayList<>();
 
         // Start DFS from this cell
-        dfs(board, i, j, visited, currentWord, currentPath, foundWords);
+        dfs(board, i, j, visited, currentWord, currentPath, foundWords, foundWordStrings);
       }
     }
 
@@ -155,14 +153,14 @@ public class BogglePlayer {
   // Calculate score based on word length: (length - 2)^2
   private int calculateScore(int length) {
     if (length < 3)
-      return -1;
+      return 0;
     return (length - 2) * (length - 2);
   }
 
   // DFS to find words on the board
   private void dfs(char[][] board, int row, int col, boolean[][] visited,
       StringBuilder currentWord, ArrayList<Location> currentPath,
-      PriorityQueue<Word> foundWords) {
+      PriorityQueue<Word> foundWords, Set<String> foundWordStrings) {
 
     // Bounds check
     if (row < 0 || row >= 4 || col < 0 || col >= 4 || visited[row][col]) {
@@ -189,43 +187,24 @@ public class BogglePlayer {
     // Check if the current prefix exists in the dictionary
     if (prefixExists(wordSoFar)) {
       // If it's a complete word with at least 3 letters, add it to our found words
-      // Check length first before checking if it's a complete word (Short-Circuiting)
-      //no need to dictonary look up if length is less than 3
-      if ( wordSoFar.length() >= 3 && wordExists(wordSoFar)) {
-        // Check if we already have 20 words, and if this word is better than our lowest
-        // scoring word
-        if (foundWords.size() < 20 ||
-            calculateScore(wordSoFar.length()) > calculateScore(foundWords.peek().getWord().length())) {
-
-          // Create a Word object and add to found words
+      if (wordSoFar.length() >= 3 && wordExists(wordSoFar)) {
+        // Only add if we haven't seen this word before
+        if (!foundWordStrings.contains(wordSoFar)) {
+          foundWordStrings.add(wordSoFar);
+          
+          // Create a Word object
           Word word = new Word(wordSoFar);
-
+          
           // Deep copy of the current path to store in the Word object
           ArrayList<Location> pathCopy = new ArrayList<>();
           for (Location loc : currentPath) {
             pathCopy.add(new Location(loc.row, loc.col));
           }
-
+          
           word.setPath(pathCopy);
-
-          // Check if we already found this word to avoid duplicates
-          //need to use hashset here for O(1) lookup
-          boolean isDuplicate = false;
-          for (Word w : foundWords) {
-            if (w.getWord().equals(wordSoFar)) {
-              isDuplicate = true;
-              break;
-            }
-          }
-
-          if (!isDuplicate) {
-            foundWords.add(word);
-
-            // If we exceed 20 words, remove the lowest scoring word
-            if (foundWords.size() > 20) {
-              foundWords.poll();
-            }
-          }
+          
+          // Add to our collection of found words
+          foundWords.add(word);
         }
       }
 
@@ -234,7 +213,7 @@ public class BogglePlayer {
         int newRow = row + ROW_DIR[i];
         int newCol = col + COL_DIR[i];
 
-        dfs(board, newRow, newCol, visited, currentWord, currentPath, foundWords);
+        dfs(board, newRow, newCol, visited, currentWord, currentPath, foundWords, foundWordStrings);
       }
     }
 
