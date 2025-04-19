@@ -1,10 +1,10 @@
 /*
-  Authors (group members): Your name(s)
+  Authors : Your name(s)
   Email addresses of group members: Your email(s)
-  Group name: Your group name
+  Group name: Chaining It
 
   Course: CSE 2010
-  Section: Your section
+  Section: E1
 
   Description of the overall algorithm and key data structures:
   
@@ -14,6 +14,8 @@
   For finding words on the board, we use depth-first search (DFS) from each position on the board.
   The DFS algorithm recursively explores adjacent cells while tracking visited positions to avoid using
   the same position multiple times for a single word.
+
+  Hashset is used to store found words to do O(1) lookup for duplicate checking
   
   The implementation collects all valid words during board traversal and then selects the top 20
   highest-scoring words (prioritizing longer words) for the final result.
@@ -79,8 +81,8 @@ public class BogglePlayer {
     current.isEndOfWord = true;
   }
 
-  // Check if a prefix exists in the Trie
-  private boolean prefixExists(String prefix) {
+  // Modified method that returns the node at the end of prefix path
+  private TrieNode prefixNode(String prefix) {
     TrieNode current = root;
 
     for (int i = 0; i < prefix.length(); i++) {
@@ -88,38 +90,30 @@ public class BogglePlayer {
       TrieNode node = current.children.get(c);
 
       if (node == null) {
-        return false;
+        return null;
       }
 
       current = node;
     }
 
-    return true;
+    return current; // Return the node at the end of the prefix
   }
 
-  // Check if a word exists in the Trie
-  private boolean wordExists(String word) {
-    TrieNode current = root;
+  // Check if a prefix exists in the Trie
+  private boolean prefixExists(String prefix) {
+    return prefixNode(prefix) != null;
+  }
 
-    for (int i = 0; i < word.length(); i++) {
-      char c = word.charAt(i);
-      TrieNode node = current.children.get(c);
-
-      if (node == null) {
-        return false;
-      }
-
-      current = node;
-    }
-
-    return current.isEndOfWord;
+  // Check if a word exists in the Trie starting from a given node
+  private boolean wordExists(TrieNode startNode, String word) {
+    return startNode != null && startNode.isEndOfWord;
   }
 
   // Based on the board, find valid words
   public Word[] getWords(char[][] board) {
     // Use a Set to efficiently track duplicates
     Set<String> foundWordStrings = new HashSet<>();
-    
+
     // PriorityQueue to store found words prioritized by score (longer words first)
     PriorityQueue<Word> foundWords = new PriorityQueue<>((w1, w2) -> {
       int score1 = calculateScore(w1.getWord().length());
@@ -183,26 +177,29 @@ public class BogglePlayer {
     visited[row][col] = true;
 
     String wordSoFar = currentWord.toString();
+    // Check if the current prefix exists in the dictionary
+    TrieNode prefixNode = prefixNode(wordSoFar);
 
     // Check if the current prefix exists in the dictionary
-    if (prefixExists(wordSoFar)) {
+    if (prefixNode != null) {
       // If it's a complete word with at least 3 letters, add it to our found words
-      if (wordSoFar.length() >= 3 && wordExists(wordSoFar)) {
+      //optimized to start checking from word exist from end of prefixNode
+      if (wordSoFar.length() >= 3 && wordExists(prefixNode, wordSoFar)) {
         // Only add if we haven't seen this word before
         if (!foundWordStrings.contains(wordSoFar)) {
           foundWordStrings.add(wordSoFar);
-          
+
           // Create a Word object
           Word word = new Word(wordSoFar);
-          
+
           // Deep copy of the current path to store in the Word object
           ArrayList<Location> pathCopy = new ArrayList<>();
           for (Location loc : currentPath) {
             pathCopy.add(new Location(loc.row, loc.col));
           }
-          
+
           word.setPath(pathCopy);
-          
+
           // Add to our collection of found words
           foundWords.add(word);
         }
