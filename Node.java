@@ -39,6 +39,7 @@ public class Node {
             if (!node.getEnd() ){
                 Node current = node;
                 StringBuilder compressed = new StringBuilder();
+                //compressed.append(current.getChar());
                 while( !current.getEnd() &&current.children.size() == 1){
                     Map.Entry<Character,Node> entry = current.children.entrySet().iterator().next();
                     compressed.append(entry.getKey());
@@ -48,6 +49,9 @@ public class Node {
                     node.string = compressed.toString();
                     node.children = current.children;
                     node.end = current.end;
+                }
+                else{
+                    node.string = String.valueOf(current.getChar());
                 }
             }
             node.compress();
