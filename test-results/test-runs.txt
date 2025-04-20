@@ -1,0 +1,152 @@
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt       
+Pre-processing in seconds (not part of score): 2.1875E-1
+memory in bytes (not part of score): 1.7378E8
+Playing Boggle...
+Points: 129
+Time in seconds: 1.5625E-2
+Overall Score: 10.0987
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 1232
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 1.4062E-1
+memory in bytes (not part of score): 1.7616E8
+Points: 385
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7616E8
+Overall Score: 89.3422
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 123451
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 1.0938E-1
+memory in bytes (not part of score): 1.7603E8
+Zero time usage was reported; please rerun
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 56341
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 1.875E-1
+memory in bytes (not part of score): 1.7616E8
+Points: 481
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7616E8
+Overall Score: 139.4523
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 989762
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 1.875E-1
+memory in bytes (not part of score): 1.738E8
+Points: 240
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.738E8
+Overall Score: 34.9536
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 23781
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 1.875E-1
+memory in bytes (not part of score): 1.7386E8
+Points: 370
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7386E8
+Overall Score: 83.0604
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 3217861
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 2.0312E-1
+memory in bytes (not part of score): 1.7385E8
+Zero time usage was reported; please rerun
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 324398 
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 2.3438E-1
+memory in bytes (not part of score): 1.7382E8
+Playing Boggle...
+Zero time usage was reported; please rerun
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 234238
+Pre-processing in seconds (not part of score): 2.5E-1
+memory in bytes (not part of score): 1.7382E8
+Playing Boggle...
+Points: 222
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7382E8
+Overall Score: 29.9053
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 873483472
+Pre-processing in seconds (not part of score): 2.0312E-1
+memory in bytes (not part of score): 1.7394E8
+Playing Boggle...
+Zero time usage was reported; please rerun
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 932833243
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 2.1875E-1
+memory in bytes (not part of score): 1.7388E8
+Points: 343
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7388E8
+Overall Score: 71.3766
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 2342897  
+Pre-processing in seconds (not part of score): 2.3438E-1
+memory in bytes (not part of score): 1.7167E8
+Playing Boggle...
+Points: 308
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7167E8
+Overall Score: 57.9218
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 7873289473
+Pre-processing in seconds (not part of score): 1.5625E-1
+memory in bytes (not part of score): 1.7781E8
+Playing Boggle...
+Points: 165
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7781E8
+Overall Score: 16.3337
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 23947892  
+Pre-processing in seconds (not part of score): 1.0938E-1
+memory in bytes (not part of score): 1.7376E8
+Playing Boggle...
+Points: 175
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7376E8
+Overall Score: 18.5862
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 23        
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 2.8125E-1
+memory in bytes (not part of score): 1.7168E8
+Playing Boggle...
+Points: 147
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7168E8
+Overall Score: 13.1935
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 4532
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 2.0312E-1
+memory in bytes (not part of score): 1.7387E8
+Playing Boggle...
+Points: 183
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7387E8
+Overall Score: 20.3181
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 908 
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 2.3438E-1
+memory in bytes (not part of score): 1.7394E8
+Playing Boggle...
+Zero time usage was reported; please rerun
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 9083284
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 2.6562E-1
+memory in bytes (not part of score): 1.7384E8
+Playing Boggle...
+Points: 158
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7384E8
+Overall Score: 15.1471
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 600    
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 2.8125E-1
+memory in bytes (not part of score): 1.738E8
+Playing Boggle...
+Points: 246
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.738E8
+Overall Score: 36.7231
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> java EvalBogglePlayer words.txt 635332
+Preprocessing in BogglePlayer...
+Pre-processing in seconds (not part of score): 2.0312E-1
+memory in bytes (not part of score): 1.7591E8
+Playing Boggle...
+Points: 201
+Time in seconds: 1.5625E-2
+Used memory in bytes: 1.7591E8
+Overall Score: 24.3689
+PS C:\Users\Ipule Pipi\Desktop\Spring2025\DSA\Boggle-Game> 

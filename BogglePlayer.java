@@ -61,6 +61,7 @@ public class BogglePlayer {
   }
 
   // Insert a word into the Trie
+  // Insert a word into the Trie
   private void insertWord(String word) {
     TrieNode current = root;
 
@@ -72,6 +73,14 @@ public class BogglePlayer {
       if (node == null) {
         node = new TrieNode();
         current.children.put(c, node);
+
+        // Special case: If the character is 'Q', automatically add 'U' as a child
+        if (c == 'Q') {
+          TrieNode uNode = new TrieNode();
+          node.children.put('U', uNode);
+          current = uNode; // Set current to uNode to continue from 'U'
+          continue; // Skip the current = node at the end since we've set current = uNode
+        }
       }
 
       current = node;
@@ -104,7 +113,7 @@ public class BogglePlayer {
     return prefixNode(prefix) != null;
   }
 
-  // Check if a word exists in the Trie starting from a given node
+  // Check if a word exists in the Trie starting from a end of prefixNode
   private boolean wordExists(TrieNode startNode, String word) {
     return startNode != null && startNode.isEndOfWord;
   }
@@ -183,8 +192,8 @@ public class BogglePlayer {
     // Check if the current prefix exists in the dictionary
     if (prefixNode != null) {
       // If it's a complete word with at least 3 letters, add it to our found words
-      //optimized to start checking from word exist from end of prefixNode
-      if (wordSoFar.length() >= 3 && wordExists(prefixNode, wordSoFar)) {
+      // optimized to start checking from word exist from end of prefixNode
+      if (wordSoFar.length() >= 3 && prefixNode.isEndOfWord) {
         // Only add if we haven't seen this word before
         if (!foundWordStrings.contains(wordSoFar)) {
           foundWordStrings.add(wordSoFar);
