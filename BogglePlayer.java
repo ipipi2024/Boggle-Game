@@ -19,6 +19,9 @@
   
   The implementation collects all valid words during board traversal and then selects the top 20
   highest-scoring words (prioritizing longer words) for the final result.
+  
+  Optimization: The DFS now passes the current TrieNode instead of rechecking the entire prefix
+  from the root each time a new letter is added.
 */
 
 import java.util.*;
@@ -61,7 +64,6 @@ public class BogglePlayer {
   }
 
   // Insert a word into the Trie
-  // Insert a word into the Trie
   private void insertWord(String word) {
     TrieNode current = root;
 
@@ -90,34 +92,6 @@ public class BogglePlayer {
     current.isEndOfWord = true;
   }
 
-  // Modified method that returns the node at the end of prefix path
-  private TrieNode prefixNode(String prefix) {
-    TrieNode current = root;
-
-    for (int i = 0; i < prefix.length(); i++) {
-      char c = prefix.charAt(i);
-      TrieNode node = current.children.get(c);
-
-      if (node == null) {
-        return null;
-      }
-
-      current = node;
-    }
-
-    return current; // Return the node at the end of the prefix
-  }
-
-  // Check if a prefix exists in the Trie
-  private boolean prefixExists(String prefix) {
-    return prefixNode(prefix) != null;
-  }
-
-  // Check if a word exists in the Trie starting from a end of prefixNode
-  private boolean wordExists(TrieNode startNode, String word) {
-    return startNode != null && startNode.isEndOfWord;
-  }
-
   // Based on the board, find valid words
   public Word[] getWords(char[][] board) {
     // Use a Set to efficiently track duplicates
@@ -139,8 +113,8 @@ public class BogglePlayer {
         StringBuilder currentWord = new StringBuilder();
         ArrayList<Location> currentPath = new ArrayList<>();
 
-        // Start DFS from this cell
-        dfs(board, i, j, visited, currentWord, currentPath, foundWords, foundWordStrings);
+        // Start DFS from this cell with the root node of the Trie
+        dfs(board, i, j, visited, currentWord, currentPath, foundWords, foundWordStrings, root);
       }
     }
 
@@ -160,23 +134,37 @@ public class BogglePlayer {
     return (length - 2) * (length - 2);
   }
 
-  // DFS to find words on the board
+  // DFS to find words on the board - OPTIMIZED to pass the current TrieNode
   private void dfs(char[][] board, int row, int col, boolean[][] visited,
       StringBuilder currentWord, ArrayList<Location> currentPath,
-      PriorityQueue<Word> foundWords, Set<String> foundWordStrings) {
+      PriorityQueue<Word> foundWords, Set<String> foundWordStrings, TrieNode currentNode) {
 
     // Bounds check
     if (row < 0 || row >= 4 || col < 0 || col >= 4 || visited[row][col]) {
       return;
     }
 
-    // Get the current letter and handle Q->QU case
+    // Get the current letter
     char letter = board[row][col];
 
-    // Add current letter to the word being built
-    currentWord.append(letter);
+    // Check if this letter exists in the Trie from our current position
+    TrieNode nextNode = currentNode.children.get(letter);
+
+    // If letter doesn't exist in Trie at this point, backtrack immediately
+    if (nextNode == null) {
+      return;
+    }
+
+    // Special case for Q - we need to check if U exists after Q
     if (letter == 'Q') {
-      currentWord.append('U');
+      TrieNode uNode = nextNode.children.get('U');
+      if (uNode == null) {
+        return; // U doesn't follow Q in the Trie, so this path is invalid
+      }
+      nextNode = uNode; // Move to the node after U
+      currentWord.append("QU");
+    } else {
+      currentWord.append(letter);
     }
 
     // Add current position to the path
@@ -185,42 +173,35 @@ public class BogglePlayer {
     // Mark current cell as visited
     visited[row][col] = true;
 
-    String wordSoFar = currentWord.toString();
-    // Check if the current prefix exists in the dictionary
-    TrieNode prefixNode = prefixNode(wordSoFar);
+    // Check if we've found a complete word of at least 3 letters
+    if (currentWord.length() >= 3 && nextNode.isEndOfWord) {
+      String wordFound = currentWord.toString();
+      // Only add if we haven't seen this word before
+      if (!foundWordStrings.contains(wordFound)) {
+        foundWordStrings.add(wordFound);
 
-    // Check if the current prefix exists in the dictionary
-    if (prefixNode != null) {
-      // If it's a complete word with at least 3 letters, add it to our found words
-      // optimized to start checking from word exist from end of prefixNode
-      if (wordSoFar.length() >= 3 && prefixNode.isEndOfWord) {
-        // Only add if we haven't seen this word before
-        if (!foundWordStrings.contains(wordSoFar)) {
-          foundWordStrings.add(wordSoFar);
+        // Create a Word object
+        Word word = new Word(wordFound);
 
-          // Create a Word object
-          Word word = new Word(wordSoFar);
-
-          // Deep copy of the current path to store in the Word object
-          ArrayList<Location> pathCopy = new ArrayList<>();
-          for (Location loc : currentPath) {
-            pathCopy.add(new Location(loc.row, loc.col));
-          }
-
-          word.setPath(pathCopy);
-
-          // Add to our collection of found words
-          foundWords.add(word);
+        // Deep copy of the current path to store in the Word object
+        ArrayList<Location> pathCopy = new ArrayList<>();
+        for (Location loc : currentPath) {
+          pathCopy.add(new Location(loc.row, loc.col));
         }
-      }
 
-      // Continue DFS in all 8 directions
-      for (int i = 0; i < 8; i++) {
-        int newRow = row + ROW_DIR[i];
-        int newCol = col + COL_DIR[i];
+        word.setPath(pathCopy);
 
-        dfs(board, newRow, newCol, visited, currentWord, currentPath, foundWords, foundWordStrings);
+        // Add to our collection of found words
+        foundWords.add(word);
       }
+    }
+
+    // Continue DFS in all 8 directions with the next node in the Trie
+    for (int i = 0; i < 8; i++) {
+      int newRow = row + ROW_DIR[i];
+      int newCol = col + COL_DIR[i];
+
+      dfs(board, newRow, newCol, visited, currentWord, currentPath, foundWords, foundWordStrings, nextNode);
     }
 
     // Backtrack: remove the current letter and mark cell as unvisited
