@@ -277,8 +277,9 @@ public class EvalBogglePlayer {
             int row = word.getLetterRow(i);
             int col = word.getLetterCol(i);
 
-            if (used[row][col] || board[row][col] != word.getWord().charAt(letterIndex))
+            if (used[row][col] || board[row][col] != word.getWord().charAt(letterIndex)) {
                 return -((length - 2) * (length - 2));
+            }
             else
                 used[row][col] = true;
             if (word.getWord().charAt(letterIndex) == 'Q')

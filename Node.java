@@ -1,29 +1,30 @@
-import java.util.HashMap;
-import java.util.Map;
+class Node {
+    private char value;
+    private Node[] children;
+    private boolean isEnd;
 
-public class Node {
-    private final char data;
-    private boolean end;
-    private Map<Character,Node> children = new HashMap<>();
-
-    public Node(char character) {
-        this.data = character;
-        this.end = false;
+    public Node(char value) {
+        this.value = value;
+        this.children = new Node[26]; // For A-Z
     }
 
-    public boolean getEnd() {
-        return end;
+    public Node getChild(char c) {
+        return children[c - 'A'];
     }
 
-    public void setEnd(boolean b) {
-        end = b;
+    public void setChild(char c, Node child) {
+        children[c - 'A'] = child;
     }
 
-    public char getChar() {
-        return data;
-    }
-
-    public Map<Character,Node> getChildren() {
+    public Node[] getChildren() {
         return children;
+    }
+
+    public boolean isEnd() {
+        return isEnd;
+    }
+
+    public void setEnd(boolean end) {
+        this.isEnd = end;
     }
 }

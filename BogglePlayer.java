@@ -19,14 +19,13 @@ import java.util.*;
 public class BogglePlayer 
 {
     private BufferedReader dictionary;
-    private Trie validWords;
-    public wordComparator wC = new wordComparator();
+    private CompressedTrie validWords;
     // initialize BogglePlayer with a file of English words
     public BogglePlayer(String wordFile) throws IOException
     {
       try {
         dictionary = new BufferedReader(new FileReader(wordFile));
-        validWords = new Trie();
+        validWords = new CompressedTrie();
 
         String curr = dictionary.readLine();
         /* If the word is above length 2, conver to upper case and add */
@@ -81,84 +80,183 @@ public class BogglePlayer
     /* Gets the surrounding characters in a square of the target
      * Iterates over all of possible, but if out of bounds doesnt add
      */
-    private Queue<Word> getSurrounding(Word target, int row, int col, char[][] board) {
-      /* Go around in a square of the current indexes and add to queue */
-      Queue<Word> adj = new LinkedList<>();
-      for (int i = row - 1; i <= row+1 && i < 4; i++) {
-        for (int j = col-1; j <= col+1 && j < 4; j++) {
-          /* If in bounds and isnt already on the path */
-          if ((i >= 0 && j >= 0) && target.isUnique(i, j)) {
-            /* New word */
-            Word potential = new Word(target);
-            /* Set the new word */
-            potential.setWord(potential.getWord() + board[i][j]);
-            /* Add it to path */
-            potential.addLetterRowAndCol(i, j);
-            /* Add it to the queue */
-            adj.add(potential);
-          }
-        }
+    private void dfsCompressed(
+      char[][] board,
+      boolean[][] visited,
+      int row,
+      int col,
+      CompressedNode node,
+      StringBuilder currentWord,
+      List<Location> currentPath,
+      Set<String> foundWords,
+      PriorityQueue<Word> wordHeap
+  ) {
+      if (row < 0 || row >= 4 || col < 0 || col >= 4 || visited[row][col]) {
+          return;
       }
-      return adj;
-    }
-
-    public Word[] getWords(char[][] board)
-    {
-      //printBoard(board);
-      /* Priority queue is to return the longest words, aka the most points */
-      PriorityQueue<Word> pQ = new PriorityQueue<>(wC);
-
-	    Word[] myWords = new Word[20];  // assuming 20 words are found
-      int wordCounter = 0;
-
-      /* Iterates over the entire board */
-      for (int row = 0; row < 4; row ++) {
-        for (int col = 0; col < 4; col++) {
-          /* Create a new word */
-          Word start = new Word(""+board[row][col]);
-          /* Add path */
-          start.addLetterRowAndCol(row, col);
-          /* Get the surrounding characters */
-          Queue<Word> potentialWords = getSurrounding(start, row, col, board);
-          while (!potentialWords.isEmpty()) {
-            /* Will discover and compare all possible word paths from the row col */
-            Word current = potentialWords.remove();
-            Node res = validWords.search(current.getWord());
-            /* If res is null, that means that prefix doesnt exist so that word doesnt exist */
-            if (res != null) {
-              if (res.getEnd() == true) {
-                pQ.add(current);
+  
+      // Handle current position (including Q→QU conversion)
+      char c = board[row][col];
+      String charStr = (c == 'Q') ? "QU" : String.valueOf(c);
+      visited[row][col] = true;
+      currentPath.add(new Location(row, col));
+  
+      // Check all child nodes
+      for (CompressedNode child : node.children.values()) {
+          if (child.text.startsWith(charStr)) {
+              // Save current length for backtracking
+              int wordLengthBefore = currentWord.length();
+              int pathLengthBefore = currentPath.size();
+  
+              // Add the matching characters
+              currentWord.append(charStr);
+  
+              if (child.text.length() > charStr.length()) {
+                  // Handle multi-character sequences from compressed trie
+                  String remaining = child.text.substring(charStr.length());
+                  List<Location> extendedPath = new ArrayList<>(currentPath);
+                  boolean[][] extendedVisited = copyVisitedArray(visited);
+  
+                  if (matchRemaining(board, extendedVisited, row, col, remaining, extendedPath)) {
+                      currentWord.append(remaining);
+  
+                      if (child.isWord && currentWord.length() >= 3) {
+                          String word = currentWord.toString();
+                          if (!foundWords.contains(word)) {
+                              Word newWord = new Word(word);
+                              newWord.setPath(new ArrayList<>(extendedPath));
+                              wordHeap.add(newWord);
+                              foundWords.add(word);
+                          }
+                      }
+  
+                      // Continue DFS from end of extended path
+                      Location last = extendedPath.get(extendedPath.size() - 1);
+                      dfsCompressed(board, extendedVisited, last.row, last.col, child,
+                                  currentWord, extendedPath, foundWords, wordHeap);
+                  }
+                  // Backtrack: reset to length before this child was processed
+                  currentWord.setLength(wordLengthBefore);
+              } else {
+                  // Complete match at current node
+                  if (child.isWord && currentWord.length() >= 3) {
+                      String word = currentWord.toString();
+                      if (!foundWords.contains(word)) {
+                          Word newWord = new Word(word);
+                          newWord.setPath(new ArrayList<>(currentPath));
+                          wordHeap.add(newWord);
+                          foundWords.add(word);
+                      }
+                  }
+  
+                  // Explore all 8 directions
+                  for (int dr = -1; dr <= 1; dr++) {
+                      for (int dc = -1; dc <= 1; dc++) {
+                          if (dr == 0 && dc == 0) continue;
+                          dfsCompressed(board, visited, row + dr, col + dc, child,
+                                      currentWord, currentPath, foundWords, wordHeap);
+                      }
+                  }
+                  // Backtrack: reset to length before this child was processed
+                  currentWord.setLength(wordLengthBefore);
               }
-              /* Its possible that words like different and differentiate exist, so you keep searching with that prefix */
-              Location loc = current.getLetterLocation(current.getPathLength()-1);
-              Queue<Word> temp = getSurrounding(current, loc.row, loc.col, board);
-              potentialWords.addAll(temp);
-            }
           }
-        }
       }
+  
+      // Backtrack
+      visited[row][col] = false;
+      currentPath.remove(currentPath.size() - 1);
+  }
 
-      myWords[wordCounter] = pQ.remove();
-      //System.out.println(myWords[wordCounter].getWord());
-      wordCounter++;
-      /* Add top 20 words to the myWords */
-      while (!pQ.isEmpty() && wordCounter < 19) {
-        myWords[wordCounter] = pQ.remove();
-        if (!myWords[wordCounter-1].getWord().equals(myWords[wordCounter].getWord())) {
-          //System.out.println(myWords[wordCounter].getWord());
-          wordCounter++;
-        }
-      }
-
-
-        return myWords;
+private boolean matchRemaining(
+    char[][] board,
+    boolean[][] visited,
+    int row,
+    int col,
+    String remaining,
+    List<Location> path
+) {
+    if (remaining.isEmpty()) {
+        return true;
     }
 
-    /* Comparator for the priority queue */
-    static class wordComparator implements Comparator<Word> {
-      @Override
-      public int compare(Word ob1, Word ob2) {
-          return Integer.compare(ob2.getWord().length(), ob1.getWord().length());
-      }
+    // Handle Q→QU
+    String nextChar = remaining.substring(0, 1);
+    if (nextChar.equals("Q") && remaining.length() > 1 && remaining.charAt(1) == 'U') {
+        nextChar = "QU";
+    }
+    int charLength = nextChar.length();
+
+    // Check all 8 directions
+    for (int dr = -1; dr <= 1; dr++) {
+        for (int dc = -1; dc <= 1; dc++) {
+            if (dr == 0 && dc == 0) continue;
+
+            int newRow = row + dr;
+            int newCol = col + dc;
+
+            if (newRow < 0 || newRow >= 4 || newCol < 0 || newCol >= 4 || visited[newRow][newCol]) {
+                continue;
+            }
+
+            char c = board[newRow][newCol];
+            String boardChar = (c == 'Q') ? "QU" : String.valueOf(c);
+
+            if (boardChar.equals(nextChar)) {
+                visited[newRow][newCol] = true;
+                path.add(new Location(newRow, newCol));
+
+                boolean matched = matchRemaining(
+                    board, visited, newRow, newCol,
+                    remaining.substring(charLength), path
+                );
+
+                if (matched) {
+                    return true;
+                }
+
+                // Backtrack if this path didn't work
+                visited[newRow][newCol] = false;
+                path.remove(path.size() - 1);
+            }
+        }
+    }
+    return false;
+}
+
+
+private boolean[][] copyVisitedArray(boolean[][] original) {
+  boolean[][] copy = new boolean[4][4];
+  for (int i = 0; i < 4; i++) {
+      System.arraycopy(original[i], 0, copy[i], 0, 4);
   }
+  return copy;
+}
+
+  public Word[] getWords(char[][] board) {
+    PriorityQueue<Word> wordHeap = new PriorityQueue<>((w1, w2) -> Integer.compare(w2.getWord().length(), w1.getWord().length()));
+
+    Set<String> foundWords = new HashSet<>();
+
+    for (int row = 0; row < 4; row++) {
+      for (int col = 0; col < 4; col++) {
+        boolean[][] visited = new boolean[4][4];
+        dfsCompressed(board, visited, row, col, validWords.getRoot(), new StringBuilder(), new ArrayList<>(), foundWords, wordHeap);
+      }
+    }
+
+    // Convert to array in descending order of length
+    Word[] result = new Word[Math.min(20, wordHeap.size())];
+    for (int i = 0; i < result.length; i++) {
+      result[i] = wordHeap.poll();
+      System.out.println(result[i].getWord() + " " + result[i].getPath().size());
+    }
+      return result;
+    }
+
+  
+    
+  
+
+
 }

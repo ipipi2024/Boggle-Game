@@ -166,6 +166,11 @@ public class Word
         }
     }
 
+    public Word(String target, ArrayList<Location> nPath) {
+        this.word = target;
+        this.path = nPath;
+    }
+
 
 
 
