@@ -1,7 +1,7 @@
 /*
   Authors : Your name(s)
   Email addresses of group members: Your email(s)
-  Group name: Chaining It
+  Group name: Channing It 
 
   Course: CSE 2010
   Section: E1
@@ -26,6 +26,7 @@
   1. Compressed Trie reduces memory usage by collapsing single-child node chains
   2. DFS passes the current TrieNode to avoid rechecking the entire prefix from the root
   3. Special handling for 'Q' is integrated into the trie structure to automatically handle 'QU' pairs
+  4. Array-based child storage (instead of HashMap) for better memory efficiency
 */
 
 import java.util.*;
@@ -41,21 +42,42 @@ public class BogglePlayer {
 
   // Inner class representing a node in the Compressed Trie
   private class TrieNode {
-    private final Map<Character, TrieNode> children;
+    private final TrieNode[] children; // Array of size 26 for A-Z
     private String prefix; // The string segment stored at this node
     private boolean isEndOfWord;
 
     public TrieNode() {
-      this.children = new HashMap<>();
+      this.children = new TrieNode[26]; // One slot for each uppercase letter
       this.prefix = "";
       this.isEndOfWord = false;
     }
 
     public TrieNode(String prefix) {
-      this.children = new HashMap<>();
+      this.children = new TrieNode[26]; // One slot for each uppercase letter
       this.prefix = prefix;
       this.isEndOfWord = false;
     }
+  }
+  
+  // Helper method to convert character to array index
+  private int charToIndex(char c) {
+    return c - 'A';
+  }
+  
+  // Helper method to check if a character exists in children array
+  private boolean hasChild(TrieNode node, char c) {
+    int index = charToIndex(c);
+    return index >= 0 && index < 26 && node.children[index] != null;
+  }
+  
+  // Helper method to get a child node
+  private TrieNode getChild(TrieNode node, char c) {
+    return node.children[charToIndex(c)];
+  }
+  
+  // Helper method to put a child node
+  private void putChild(TrieNode node, char c, TrieNode child) {
+    node.children[charToIndex(c)] = child;
   }
 
   // Initialize BogglePlayer with a file of English words
@@ -95,17 +117,17 @@ public class BogglePlayer {
         }
         
         // Check if there's a child starting with the current character
-        if (!current.children.containsKey(firstChar)) {
+        if (!hasChild(current, firstChar)) {
             // No matching child, create a new node with remaining substring
             String remaining = word.substring(i);
             TrieNode newNode = new TrieNode(remaining);
             newNode.isEndOfWord = true;
-            current.children.put(firstChar, newNode);
+            putChild(current, firstChar, newNode);
             return;
         }
         
         // Get the matching child node
-        TrieNode child = current.children.get(firstChar);
+        TrieNode child = getChild(current, firstChar);
         String childPrefix = child.prefix;
         
         // Find the point of mismatch between child's prefix and remaining word
@@ -131,17 +153,17 @@ public class BogglePlayer {
             child.prefix = childRemaining;
             
             // Update parent to point to the split node
-            current.children.put(firstChar, splitNode);
+            putChild(current, firstChar, splitNode);
             
             // Add the existing child as a child of the split node
-            splitNode.children.put(childRemaining.charAt(0), child);
+            putChild(splitNode, childRemaining.charAt(0), child);
             
             // If there's more of the word to add
             if (i + j < word.length()) {
                 String wordRemaining = word.substring(i + j);
                 TrieNode newChild = new TrieNode(wordRemaining);
                 newChild.isEndOfWord = true;
-                splitNode.children.put(wordRemaining.charAt(0), newChild);
+                putChild(splitNode, wordRemaining.charAt(0), newChild);
             } else {
                 // The word ends exactly at the split point
                 splitNode.isEndOfWord = true;
@@ -197,11 +219,11 @@ public class BogglePlayer {
         i++;
       }
       
-      if (!current.children.containsKey(firstChar)) {
+      if (!hasChild(current, firstChar)) {
         return null; // No match found
       }
       
-      TrieNode child = current.children.get(firstChar);
+      TrieNode child = getChild(current, firstChar);
       String childPrefix = child.prefix;
       
       // Check if childPrefix is a prefix of the remaining search string
