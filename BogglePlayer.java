@@ -116,7 +116,7 @@ return;
 
 // Special case for Q - we need to check if U exists after Q
 if (letter == 'Q') {
-Node uNode = nextNode.children['U'];
+Node uNode = nextNode.children['U'-'A'];
 if (uNode == null) {
   return; // U doesn't follow Q in the Trie, so this path is invalid
 }
