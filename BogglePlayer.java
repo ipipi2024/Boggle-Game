@@ -27,6 +27,7 @@
   2. DFS passes the current TrieNode to avoid rechecking the entire prefix from the root
   3. Special handling for 'Q' is integrated into the trie structure to automatically handle 'QU' pairs
   4. Array-based child storage (instead of HashMap) for better memory efficiency
+  5. Optimized findNode that continues searching from the current node instead of starting from root every time
 */
 
 import java.util.*;
@@ -201,14 +202,14 @@ public class BogglePlayer {
     }
   }
   
-  // Find a node that matches the given prefix
-  private TrieNodeSearchResult findNode(String prefix) {
-    if (prefix.isEmpty()) {
-      return new TrieNodeSearchResult(root, true, 0);
+  // Find a node that matches the given prefix - optimized to start from a given node
+  private TrieNodeSearchResult findNode(String prefix, TrieNode startNode, int startIndex) {
+    if (prefix.isEmpty() || (startIndex >= prefix.length())) {
+      return new TrieNodeSearchResult(startNode, true, startIndex);
     }
     
-    TrieNode current = root;
-    int i = 0;
+    TrieNode current = startNode;
+    int i = startIndex;
     
     while (i < prefix.length()) {
       char firstChar = prefix.charAt(i);
@@ -262,6 +263,11 @@ public class BogglePlayer {
     
     // Reached the end of the prefix
     return new TrieNodeSearchResult(current, true, prefix.length());
+  }
+  
+  // Overload for backward compatibility - starts search from root
+  private TrieNodeSearchResult findNode(String prefix) {
+    return findNode(prefix, root, 0);
   }
 
   // Based on the board, find valid words
@@ -333,13 +339,14 @@ public class BogglePlayer {
       currentWord.append(letter);
     }
 
-    // Check if the current path forms a valid prefix in our trie
-    String wordSoFar = currentWord.toString();
-    TrieNodeSearchResult searchResult = findNode(wordSoFar);
+    // Get the next character(s) we're adding
+    String newPart = letter == 'Q' ? "QU" : String.valueOf(letter);
+    TrieNodeSearchResult searchResult = findNode(newPart, currentNode, 0);
     
     if (searchResult != null) {
       // We have a valid prefix
       TrieNode matchedNode = searchResult.node;
+      String wordSoFar = currentWord.toString();
       
       // Check if we've found a complete word of at least 3 letters
       if (wordSoFar.length() >= 3 && matchedNode.isEndOfWord && searchResult.fullMatch) {
